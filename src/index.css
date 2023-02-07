@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: "Noto Sans TC", sans-serif, ui-sans-serif, system-ui,
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+      Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
+    height: 100vh;
+  }
+
+  
+}
+
+@layer components {
+  body {
+    @apply bg-gradient-to-l from-secondary-purple to-secondary-pink;
+  }
+
+  .tabActive {
+    @apply w-1/3 py-4 border-b-2 border-primary text-gray-900 hover:bg-white;
+  }
+
+  .tabNormal {
+    @apply w-1/3 py-4 border-b border-gray-400 text-gray-400 hover:bg-white;
+  }
+}
