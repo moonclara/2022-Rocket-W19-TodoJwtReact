@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { useAuth } from "../components/Context";
 import logo from "../images/title.png";
 import empty from "../images/empty.svg";
@@ -7,7 +7,11 @@ import empty from "../images/empty.svg";
 const url = "https://todoo.5xcamp.us";
 
 function App() {
-  return <TodoPage />;
+  return (
+    <>
+      <TodoPage />
+    </>
+  );
 }
 
 function TodoPage() {
@@ -20,14 +24,56 @@ function TodoPage() {
 }
 
 function Header() {
+  const nickname = localStorage.getItem("nickname");
+
   return (
     <nav className="flex flex-col md:flex-row items-center justify-between my-8 ">
       <img src={logo} alt="logo" width="300" />
-      <div className="flex space-x-8 text-primary">
-        <span>Hello,王曉明！</span>
-        <NavLink to="/">登出</NavLink>
+      <div className="flex space-x-4 text-primary items-center">
+        <span>Hello , {nickname} ！</span>
+        <Logout />
       </div>
     </nav>
+  );
+}
+
+function Logout() {
+  const { token, setToken } = useAuth();
+  const navigate = useNavigate();
+
+  const logout = () => {
+    fetch(`${url}/users/sign_out`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        setToken(null);
+        localStorage.removeItem("token");
+        return res.json();
+      })
+      .then((res) => {
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("登出失敗");
+      });
+  };
+
+  return (
+    <a
+      type="button"
+      className="w-20 h-10 rounded-lg  hover:bg-primary hover:text-white p-2 cursor-pointer"
+      onClick={() => {
+        logout();
+      }}
+    >
+      登出
+    </a>
   );
 }
 
@@ -35,7 +81,12 @@ function TodoContainer() {
   const [todo, setTodo] = useState([]);
   const { token } = useAuth();
 
-  const getTodo = async () => {
+  // TODO : 取得 todo 列表
+  const getTodo = (res) => {
+    setTodo(res.todos);
+  };
+
+  const getApi = async () => {
     await fetch(`${url}/todos`, {
       method: "GET",
       headers: {
@@ -55,7 +106,7 @@ function TodoContainer() {
       })
       .then((res) => {
         console.log(res);
-        setTodo(res.todos);
+        getTodo(res);
       })
       .catch((err) => {
         console.log(err);
@@ -63,7 +114,7 @@ function TodoContainer() {
   };
 
   useEffect(() => {
-    getTodo();
+    getApi();
   }, []);
 
   return (
@@ -85,7 +136,7 @@ function AddTodo({ todo, setTodo }) {
   const { token } = useAuth();
 
   // TODO : 新增 todo
-  const addItem = (res) => {
+  const addTodo = (res) => {
     if (value === "") {
       return alert("請確實輸入內容");
     }
@@ -93,7 +144,7 @@ function AddTodo({ todo, setTodo }) {
     setTodo([...todo, res]);
   };
 
-  const addTodo = () => {
+  const addApi = () => {
     fetch(`${url}/todos`, {
       method: "POST",
       headers: {
@@ -108,14 +159,12 @@ function AddTodo({ todo, setTodo }) {
         if (!res.ok) {
           throw new Error(res.statusText);
         }
-        console.log(res);
         return res.json();
       })
       .then((res) => {
         console.log(res); // 物件
-        console.log(token);
         console.log(todo);
-        addItem(res);
+        addTodo(res);
       })
       .catch((err) => {
         console.log(err);
@@ -137,7 +186,7 @@ function AddTodo({ todo, setTodo }) {
       <a
         type="button"
         onClick={() => {
-          addTodo();
+          addApi();
         }}
         className="w-10 h-10 rounded-lg text-black bg-white absolute right-1 top-1 hover:bg-pink-200 hover:text-white p-2 cursor-pointer"
       >
@@ -187,13 +236,13 @@ function TodoContent({ todo, setTodo }) {
   };
 
   // TODO : 刪除 Todo
-  const delItem = (id) => {
+  const delTodo = (id) => {
     const newTodo = todo.filter((newItem) => {
       return newItem.id !== id;
     });
     setTodo(newTodo);
   };
-  const delTodo = (id) => {
+  const delApi = (id) => {
     fetch(`${url}/todos/${id}`, {
       method: "DELETE",
       headers: {
@@ -205,21 +254,50 @@ function TodoContent({ todo, setTodo }) {
         if (!res.ok) {
           throw new Error(res.statusText);
         }
-        console.log(res);
         return res.json();
       })
       .then((res) => {
-        console.log(res);
-        console.log(todo);
-        delItem(id);
+        delTodo(id);
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  // TODO : 更改完成狀態
-  const comItemStatus = (id) => {
+  // TODO : 思考重複的 code 該如何優化
+  const getTodo = (res) => {
+    setTodo(res.todos);
+  };
+
+  const getApi = async () => {
+    await fetch(`${url}/todos`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    })
+      .then((res) => {
+        // 使用 fetch ，若伺服器有正確回應，不管甚麼狀態碼，res 都會進入 then
+        // 因此透過 res 中的 ok 來判斷狀態碼是否正確，如果是 true，狀態碼會在 200-209之間
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+        console.log(res);
+        // 轉換成 JSON 再傳入下一個 then 中處理
+        return res.json();
+      })
+      .then((res) => {
+        console.log(res);
+        getTodo(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  // TODO : 更改完成狀態(按下勾勾 -> 打api -> 渲染)
+  const todoStatus = (id) => {
     const newTodo = [...todo];
     newTodo.map((newItem) => {
       if (id === newItem.id) {
@@ -227,8 +305,10 @@ function TodoContent({ todo, setTodo }) {
       }
     });
     setTodo(newTodo);
+    getApi();
   };
-  const comTodoStatus = (id) => {
+
+  const todoStatusApi = (id) => {
     fetch(`${url}/todos/${id}/toggle`, {
       method: "PATCH",
       headers: {
@@ -246,7 +326,7 @@ function TodoContent({ todo, setTodo }) {
       .then((res) => {
         console.log(res);
         console.log(todo);
-        comItemStatus(id);
+        todoStatus(id);
       })
       .catch((err) => {
         console.log(err);
@@ -260,12 +340,17 @@ function TodoContent({ todo, setTodo }) {
   //   });
   //   setTodo(newTodo);
   // };
-  const cleanTodo = () => {
-    const compTodo = todo.filter((item, index) => {
-      return item.completed_at === null;
-    });
 
-    fetch(`${url}/todos/${compTodo[index].id}`, {
+  const compTodo = todo.filter((item) => {
+    return item.completed_at !== null;
+  });
+
+  const unCompTodo = todo.filter((item) => {
+    return item.completed_at === null;
+  });
+
+  const cleanTodoApi = () => {
+    fetch(`${url}/todos/${compTodo[0].id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -282,11 +367,10 @@ function TodoContent({ todo, setTodo }) {
       .then((res) => {
         console.log(res);
         console.log(todo);
-        setTodo(compTodo);
+        setTodo(unCompTodo);
       })
       .catch((err) => {
         console.log(err);
-        console.log(compTodo);
       });
   };
 
@@ -324,12 +408,14 @@ function TodoContent({ todo, setTodo }) {
                     className="mr-2 w-4 h-4"
                     checked={completed_at === null ? null : "checked"}
                     onChange={() => {
-                      comTodoStatus(id);
+                      todoStatusApi(id);
                     }}
                   />
                   <span
                     className={
-                      completed_at ? "text-gray-400 line-through" : "text-black"
+                      completed_at !== null
+                        ? "text-gray-400 line-through"
+                        : "text-black"
                     }
                   >
                     {content}
@@ -338,7 +424,7 @@ function TodoContent({ todo, setTodo }) {
                 <a
                   className="flex items-center cursor-pointer"
                   onClick={(e) => {
-                    delTodo(id);
+                    delApi(id);
                   }}
                 >
                   <span className="material-icons">delete_outline</span>
@@ -402,12 +488,12 @@ function TodoContent({ todo, setTodo }) {
                       className="mr-2 w-4 h-4"
                       checked={completed_at === null ? null : "checked"}
                       onChange={() => {
-                        comTodoStatus(id);
+                        todoStatusApi(id);
                       }}
                     />
                     <span
                       className={
-                        completed_at
+                        completed_at !== null
                           ? "text-gray-400 line-through"
                           : "text-black"
                       }
@@ -418,7 +504,7 @@ function TodoContent({ todo, setTodo }) {
                   <a
                     className="flex items-center cursor-pointer"
                     onClick={(e) => {
-                      delTodo(id);
+                      delApi(id);
                     }}
                   >
                     <span className="material-icons">delete_outline</span>
@@ -435,7 +521,7 @@ function TodoContent({ todo, setTodo }) {
         <a
           className="block hover:text-primary cursor-pointer"
           onClick={(e) => {
-            cleanTodo();
+            cleanTodoApi();
           }}
         >
           清除已完成項目

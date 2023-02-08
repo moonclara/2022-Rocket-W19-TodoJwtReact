@@ -4,6 +4,7 @@ import { useAuth } from "../components/Context";
 import title from "../images/title.png";
 import login from "../images/login.svg";
 import "../App.css";
+const url = "https://todoo.5xcamp.us";
 
 const SignUpPage = () => {
   const { token, setToken } = useAuth();
@@ -15,20 +16,26 @@ const SignUpPage = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    const url = "https://todoo.5xcamp.us/users";
-
-    fetch(url, {
+  const onSubmit = ({ email, password, nickname }) => {
+    fetch(`${url}/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user: data,
+        user: {
+          email,
+          password,
+          nickname,
+        },
       }),
     })
       .then((res) => {
         setToken(res.headers.get("authorization"));
+        localStorage.setItem("token", res.headers.authorization);
+        localStorage.setItem("nickname", nickname);
+        console.log(res)
+        console.log(nickname)
         return res.json();
       })
       .then((res) => {
@@ -81,7 +88,10 @@ const SignUpPage = () => {
               </div>
 
               <div className="block">
-                <label htmlFor="name" className="block text-sm text-left mb-1">
+                <label
+                  htmlFor="nickname"
+                  className="block text-sm text-left mb-1"
+                >
                   您的暱稱
                 </label>
                 <input
@@ -164,14 +174,6 @@ const SignUpPage = () => {
                 value="註冊帳號"
                 className="bg-primary text-white hover:bg-pink-300 py-2 rounded-md text-sm cursor-pointer"
               />
-              {/* <input
-                  type="button"
-                  value="登入"
-                  className="text-sm py-2 text-pink-300 hover:bg-pink-50  hover:rounded-md cursor-pointer"
-                  onClick={() => {
-                    setBlock(true);
-                  }}
-                /> */}
 
               <NavLink
                 to="/LoginPage"

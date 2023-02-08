@@ -1,9 +1,10 @@
 import { useNavigate, NavLink } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { useAuth } from "../components/Context";
 import title from "../images/title.png";
 import login from "../images/login.svg";
 import "../App.css";
+const url = "https://todoo.5xcamp.us";
 
 const LoginPage = () => {
   const { token, setToken } = useAuth();
@@ -14,16 +15,17 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    const url = "https://todoo.5xcamp.us/users/sign_in";
-
-    fetch(url, {
+  const onSubmit = ({ email, password }) => {
+    fetch(`${url}/users/sign_in`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user: data,
+        user: {
+          email,
+          password,
+        },
       }),
     })
       .then((res) => {
@@ -32,9 +34,12 @@ const LoginPage = () => {
           throw new Error("登入失敗，請重新檢驗！");
         }
         setToken(res.headers.get("authorization"));
+        localStorage.setItem("token", res.headers.authorization);
         return res.json();
       })
       .then((res) => {
+        console.log(res);
+        localStorage.setItem("nickname", res.nickname);
         navigate("/TodoPage");
       })
       .catch((err) => {
