@@ -16,8 +16,8 @@ const SignUpPage = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = ({ email, password, nickname }) => {
-    fetch(`${url}/users`, {
+  const onSubmit = async ({ email, password, nickname }) => {
+    await fetch(`${url}/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,12 +34,15 @@ const SignUpPage = () => {
         setToken(res.headers.get("authorization"));
         localStorage.setItem("token", res.headers.authorization);
         localStorage.setItem("nickname", nickname);
-        console.log(res)
-        console.log(nickname)
+        console.log(res);
+        console.log(nickname);
         return res.json();
       })
       .then((res) => {
         navigate("/TodoPage");
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
+import Swal from "sweetalert2";
 import { useAuth } from "../components/Context";
 import logo from "../images/title.png";
 import empty from "../images/empty.svg";
@@ -15,6 +16,32 @@ function App() {
 }
 
 function TodoPage() {
+  const { token, setToken } = useAuth();
+  const navigate = useNavigate();
+
+  const checkApi = async () => {
+    await fetch(`${url}/check`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        setToken(null);
+        localStorage.removeItem("token");
+        navigate("/");
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    checkApi();
+  }, []);
+
   return (
     <div className="container h-full">
       <Header />
@@ -41,8 +68,8 @@ function Logout() {
   const { token, setToken } = useAuth();
   const navigate = useNavigate();
 
-  const logout = () => {
-    fetch(`${url}/users/sign_out`, {
+  const logoutApi = async () => {
+    await fetch(`${url}/users/sign_out`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -60,7 +87,11 @@ function Logout() {
       })
       .catch((err) => {
         console.log(err);
-        alert("登出失敗");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "登出失敗!",
+        });
       });
   };
 
@@ -69,7 +100,7 @@ function Logout() {
       type="button"
       className="w-20 h-10 rounded-lg  hover:bg-primary hover:text-white p-2 cursor-pointer"
       onClick={() => {
-        logout();
+        logoutApi();
       }}
     >
       登出
@@ -120,13 +151,12 @@ function TodoContainer() {
   return (
     <div className="container">
       <AddTodo todo={todo} setTodo={setTodo} />
-      <TodoContent todo={todo} setTodo={setTodo} />
 
-      {/* {todo.length === 0 ? (
+      {todo.length === 0 ? (
         <TodoEmpty />
       ) : (
         <TodoContent todo={todo} setTodo={setTodo} />
-      )} */}
+      )}
     </div>
   );
 }
@@ -135,17 +165,44 @@ function AddTodo({ todo, setTodo }) {
   const [value, setValue] = useState("");
   const { token } = useAuth();
 
-  // TODO : 新增 todo
-  const addTodo = (res) => {
-    if (value === "") {
-      return alert("請確實輸入內容");
-    }
-    setValue("");
-    setTodo([...todo, res]);
+  // TODO : 思考重複的 code 該如何優化
+  const getTodo = (res) => {
+    setTodo(res.todos);
   };
 
-  const addApi = () => {
-    fetch(`${url}/todos`, {
+  const getApi = async () => {
+    await fetch(`${url}/todos`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+        console.log(res);
+        return res.json();
+      })
+      .then((res) => {
+        console.log(res);
+        getTodo(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  // TODO : 新增 todo(按下新增 -> 打api -> 渲染)
+  const addTodo = (res) => {
+    setValue("");
+    setTodo([...todo, res]);
+    getApi();
+  };
+
+  const addApi = async () => {
+    await fetch(`${url}/todos`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -157,6 +214,11 @@ function AddTodo({ todo, setTodo }) {
     })
       .then((res) => {
         if (!res.ok) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "請確實輸入內容!",
+          });
           throw new Error(res.statusText);
         }
         return res.json();
@@ -242,8 +304,8 @@ function TodoContent({ todo, setTodo }) {
     });
     setTodo(newTodo);
   };
-  const delApi = (id) => {
-    fetch(`${url}/todos/${id}`, {
+  const delApi = async (id) => {
+    await fetch(`${url}/todos/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -278,13 +340,10 @@ function TodoContent({ todo, setTodo }) {
       },
     })
       .then((res) => {
-        // 使用 fetch ，若伺服器有正確回應，不管甚麼狀態碼，res 都會進入 then
-        // 因此透過 res 中的 ok 來判斷狀態碼是否正確，如果是 true，狀態碼會在 200-209之間
         if (!res.ok) {
           throw new Error(res.statusText);
         }
         console.log(res);
-        // 轉換成 JSON 再傳入下一個 then 中處理
         return res.json();
       })
       .then((res) => {
@@ -308,8 +367,8 @@ function TodoContent({ todo, setTodo }) {
     getApi();
   };
 
-  const todoStatusApi = (id) => {
-    fetch(`${url}/todos/${id}/toggle`, {
+  const todoStatusApi = async (id) => {
+    await fetch(`${url}/todos/${id}/toggle`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -334,13 +393,6 @@ function TodoContent({ todo, setTodo }) {
   };
 
   // TODO : 清除已完成項目
-  // const cleanItem = (id) => {
-  //   const newTodo = todo.filter((newItem) => {
-  //     return newItem.completed_at === null;
-  //   });
-  //   setTodo(newTodo);
-  // };
-
   const compTodo = todo.filter((item) => {
     return item.completed_at !== null;
   });
@@ -349,8 +401,8 @@ function TodoContent({ todo, setTodo }) {
     return item.completed_at === null;
   });
 
-  const cleanTodoApi = () => {
-    fetch(`${url}/todos/${compTodo[0].id}`, {
+  const cleanTodoApi = async() => {
+    await fetch(`${url}/todos/${compTodo[0].id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -406,7 +458,7 @@ function TodoContent({ todo, setTodo }) {
                   <input
                     type="checkbox"
                     className="mr-2 w-4 h-4"
-                    checked={completed_at === null ? null : "checked"}
+                    checked={completed_at === null ? "" : "checked"}
                     onChange={() => {
                       todoStatusApi(id);
                     }}
@@ -431,6 +483,7 @@ function TodoContent({ todo, setTodo }) {
                 </a>
               </li>
             );
+            
           })}
         {/* 待完成 */}
         {tab[1].className === "tabActive" &&
@@ -446,14 +499,14 @@ function TodoContent({ todo, setTodo }) {
                     <input
                       type="checkbox"
                       className="mr-2 w-4 h-4"
-                      checked={completed_at === null ? null : "checked"}
+                      checked={completed_at === null ? "" : "checked"}
                       onChange={() => {
-                        comTodoStatus(id);
+                        todoStatusApi(id);
                       }}
                     />
                     <span
                       className={
-                        completed_at
+                        completed_at !== null
                           ? "text-gray-400 line-through"
                           : "text-black"
                       }
@@ -464,7 +517,7 @@ function TodoContent({ todo, setTodo }) {
                   <a
                     className="flex items-center cursor-pointer"
                     onClick={(e) => {
-                      delTodo(id);
+                      delApi(id);
                     }}
                   >
                     <span className="material-icons">delete_outline</span>
@@ -486,7 +539,7 @@ function TodoContent({ todo, setTodo }) {
                     <input
                       type="checkbox"
                       className="mr-2 w-4 h-4"
-                      checked={completed_at === null ? null : "checked"}
+                      checked={completed_at === null ? "" : "checked"}
                       onChange={() => {
                         todoStatusApi(id);
                       }}
