@@ -1,4 +1,5 @@
-import empty from "../images/empty.svg";
+import React from 'react';
+import empty from '../images/empty.svg';
 
 function Empty() {
   return (

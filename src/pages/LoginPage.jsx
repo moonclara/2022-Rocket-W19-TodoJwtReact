@@ -1,13 +1,14 @@
-import { useNavigate, NavLink } from "react-router-dom";
-import {  useForm } from "react-hook-form";
-import Swal from "sweetalert2";
-import { useAuth } from "../components/Context";
-import title from "../images/title.png";
-import login from "../images/login.svg";
-import "../App.css";
+import React from 'react';
+import { useNavigate, NavLink } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import Swal from 'sweetalert2';
+import { useAuth } from '../components/Context';
+import title from '../images/title.png';
+import login from '../images/login.svg';
+import '../App.css';
 
-const url = "https://todoo.5xcamp.us";
-const LoginPage = () => {
+const url = 'https://todoo.5xcamp.us';
+function LoginPage() {
   const { setToken } = useAuth();
   const navigate = useNavigate();
   const {
@@ -18,9 +19,9 @@ const LoginPage = () => {
 
   const onSubmit = async ({ email, password }) => {
     await fetch(`${url}/users/sign_in`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         user: {
@@ -30,25 +31,22 @@ const LoginPage = () => {
       }),
     })
       .then((res) => {
-        console.log(res);
         if (res.status === 401) {
           Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "登入失敗，請重新輸入！",
+            icon: 'error',
+            title: 'Oops...',
+            text: '登入失敗，請重新輸入！',
           });
-          throw new Error("登入失敗，請重新檢驗！");
-          
+          throw new Error('登入失敗，請重新檢驗！');
         }
-        setToken(res.headers.get("authorization"));
-        localStorage.setItem("token", res.headers.authorization);
+        setToken(res.headers.get('authorization'));
+        localStorage.setItem('token', res.headers.authorization);
         return res.json();
       })
       .then((res) => {
-        console.log(res);
-        localStorage.setItem("nickname", res.nickname);
-        navigate("/TodoPage");
-      })
+        localStorage.setItem('nickname', res.nickname);
+        navigate('/TodoPage');
+      });
   };
 
   return (
@@ -64,7 +62,8 @@ const LoginPage = () => {
           <img src={login} alt="login" className="w-[300px] md:w-[700px]" />
           <div className="bg-white p-6 rounded-lg">
             <h1 className="text-2xl text-left mb-4 font-bold">
-              Welcome to <br />
+              Welcome to
+              <br />
               the Online Todolist！
             </h1>
             <form
@@ -74,22 +73,23 @@ const LoginPage = () => {
               <div className="block">
                 <label htmlFor="email" className="block text-sm text-left mb-1">
                   Email
+                  <input
+                    type="text"
+                    className="placeholder-gray-300 p-2 border border-gray-200 focus:border-pink-300 focus:border-2 focus:outline focus:outline-offset-0 focus:outline-2 focus:outline-pink-100 rounded-md w-full"
+                    placeholder="請輸入 email"
+                    // eslint-disable-next-line react/jsx-props-no-spreading
+                    {...register('email', {
+                      required: {
+                        value: true,
+                        message: '請輸入資料內容!',
+                      },
+                      pattern: {
+                        value: /^\S+@\S+$/i,
+                        message: '格式有誤!',
+                      },
+                    })}
+                  />
                 </label>
-                <input
-                  type="text"
-                  className="placeholder-gray-300 p-2 border border-gray-200 focus:border-pink-300 focus:border-2 focus:outline focus:outline-offset-0 focus:outline-2 focus:outline-pink-100 rounded-md w-full"
-                  placeholder="請輸入 email"
-                  {...register("email", {
-                    required: {
-                      value: true,
-                      message: "請輸入資料內容!",
-                    },
-                    pattern: {
-                      value: /^\S+@\S+$/i,
-                      message: "格式有誤!",
-                    },
-                  })}
-                />
                 <p className="text-left text-primary text-sm mt-2">
                   {errors.email?.message}
                 </p>
@@ -101,22 +101,23 @@ const LoginPage = () => {
                   className="block text-sm text-left mb-1"
                 >
                   密碼
+                  <input
+                    type="password"
+                    className="placeholder-gray-300 p-2 border border-gray-200 focus:border-pink-300 focus:border-2 focus:outline focus:outline-offset-0 focus:outline-2 focus:outline-pink-100 rounded-md w-full"
+                    placeholder="請輸入密碼"
+                    // eslint-disable-next-line react/jsx-props-no-spreading
+                    {...register('password', {
+                      required: {
+                        value: true,
+                        message: '請輸入資料內容!',
+                      },
+                      minLength: {
+                        value: 6,
+                        message: '密碼長度至少6位字元',
+                      },
+                    })}
+                  />
                 </label>
-                <input
-                  type="password"
-                  className="placeholder-gray-300 p-2 border border-gray-200 focus:border-pink-300 focus:border-2 focus:outline focus:outline-offset-0 focus:outline-2 focus:outline-pink-100 rounded-md w-full"
-                  placeholder="請輸入密碼"
-                  {...register("password", {
-                    required: {
-                      value: true,
-                      message: "請輸入資料內容!",
-                    },
-                    minLength: {
-                      value: 6,
-                      message: "密碼長度至少6位字元",
-                    },
-                  })}
-                />
                 <p className="text-left text-primary text-sm mt-2">
                   {errors.password?.message}
                 </p>
@@ -138,6 +139,6 @@ const LoginPage = () => {
       </div>
     </div>
   );
-};
+}
 
 export default LoginPage;

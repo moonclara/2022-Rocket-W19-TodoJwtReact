@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import SignUpPage from "./pages/SignUpPage";
-import TodoPage from "./pages/TodoPage";
-import { AuthContext } from "./components/Context";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+/* eslint-disable react/jsx-no-constructed-context-values */
+import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import TodoPage from './pages/TodoPage';
+import { AuthContext } from './components/Context';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
-import "./App.css";
+import './App.css';
 
 function App() {
   const [token, setToken] = useState(null);

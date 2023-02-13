@@ -1,9 +1,9 @@
-import { useAuth } from "../components/Context";
-import { useEffect, useState } from "react";
-import AddTodo from "../components/AddTodo";
-import TodoList from "./TodoList";
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../components/Context';
+import AddTodo from '../components/AddTodo';
+import TodoList from './TodoList';
 
-const url = "https://todoo.5xcamp.us";
+const url = 'https://todoo.5xcamp.us';
 function Content() {
   const [todo, setTodo] = useState([]); // !初始資料
   const [data, setData] = useState(todo); // !拿來渲染用
@@ -11,9 +11,9 @@ function Content() {
 
   const getApi = async () => {
     await fetch(`${url}/todos`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         authorization: token,
       },
     })
@@ -23,18 +23,13 @@ function Content() {
         if (!res.ok) {
           throw new Error(res.statusText);
         }
-        console.log(res);
         // 轉換成 JSON 再傳入下一個 then 中處理
         return res.json();
       })
       .then((res) => {
-        console.log(res);
         // TODO : 取得 todo 列表
         setTodo(res.todos);
         setData(res.todos);
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
   useEffect(() => {

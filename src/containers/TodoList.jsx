@@ -1,9 +1,13 @@
-import Tab from "../components/Tab";
-import Empty from "../components/Empty";
-import List from "../components/List";
-import Footer from "../components/Footer";
+/* eslint-disable react/prop-types */
+import React from 'react';
+import Tab from '../components/Tab';
+import Empty from '../components/Empty';
+import List from '../components/List';
+import Footer from '../components/Footer';
 
-function TodoList({ todo, setTodo, data, setData }) {
+function TodoList({
+  todo, setTodo, data, setData,
+}) {
   return (
     <div>
       <Tab todo={todo} setTodo={setTodo} data={data} setData={setData} />

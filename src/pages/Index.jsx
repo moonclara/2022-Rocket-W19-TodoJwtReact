@@ -1,10 +1,10 @@
-import "../App.css";
+import React from 'react';
+import '../App.css';
 
-const Index = () => {
+function Index() {
   return (
-    <div className="container">
-    </div>
+    <div className="container" />
   );
-};
+}
 
 export default Index;

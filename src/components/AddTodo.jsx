@@ -1,17 +1,23 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "./Context";
-import Swal from "sweetalert2";
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable react/prop-types */
+import React, { useState } from 'react';
+import Swal from 'sweetalert2';
+import { useAuth } from './Context';
 
-const url = "https://todoo.5xcamp.us";
-function AddTodo({ todo, setTodo, setData }) {
-  const [value, setValue] = useState("");
+const url = 'https://todoo.5xcamp.us';
+function AddTodo({
+  todo, setTodo, setData,
+}) {
+  const [value, setValue] = useState('');
   const { token } = useAuth();
 
   const getApi = async () => {
     await fetch(`${url}/todos`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         authorization: token,
       },
     })
@@ -19,32 +25,27 @@ function AddTodo({ todo, setTodo, setData }) {
         if (!res.ok) {
           throw new Error(res.statusText);
         }
-        console.log(res);
         return res.json();
       })
       .then((res) => {
-        console.log(res);
         // TODO : 取得 todo 列表
         setTodo(res.todos);
         setData(res.todos);
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
 
   // TODO : 新增 todo(按下新增 -> 打api -> 渲染)
   const addTodo = (res) => {
-    setValue("");
+    setValue('');
     setTodo([...todo, res]);
     getApi();
   };
 
   const addApi = async () => {
     await fetch(`${url}/todos`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         authorization: token,
       },
       body: JSON.stringify({
@@ -54,22 +55,17 @@ function AddTodo({ todo, setTodo, setData }) {
       .then((res) => {
         if (!res.ok) {
           Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "請確實輸入內容!",
+            icon: 'error',
+            title: 'Oops...',
+            text: '請確實輸入內容!',
           });
           throw new Error(res.statusText);
         }
         return res.json();
       })
       .then((res) => {
-        console.log(res); // 物件
-        console.log(todo);
         addTodo(res);
-        getApi()
-      })
-      .catch((err) => {
-        console.log(err);
+        getApi();
       });
   };
 
@@ -84,7 +80,7 @@ function AddTodo({ todo, setTodo, setData }) {
           setValue(e.target.value);
         }}
         onKeyDown={(e) => {
-          if (e.key === "Enter") {
+          if (e.key === 'Enter') {
             addApi();
           }
         }}

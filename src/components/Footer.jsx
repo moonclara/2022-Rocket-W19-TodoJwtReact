@@ -1,18 +1,23 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "./Context";
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable react/prop-types */
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import React from 'react';
+import { useAuth } from './Context';
 
-const url = "https://todoo.5xcamp.us";
+const url = 'https://todoo.5xcamp.us';
 
-function Footer({ todo, setTodo, data, setData }) {
+function Footer({
+  // eslint-disable-next-line react/prop-types
+  todo, setTodo, data, setData,
+}) {
   const { token } = useAuth();
-
-
 
   const getApi = async () => {
     await fetch(`${url}/todos`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         authorization: token,
       },
     })
@@ -20,17 +25,12 @@ function Footer({ todo, setTodo, data, setData }) {
         if (!res.ok) {
           throw new Error(res.statusText);
         }
-        console.log(res);
         return res.json();
       })
       .then((res) => {
-        console.log(res);
         // TODO : 取得 todo 列表
         setTodo(res.todos);
         setData(res.todos);
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
 
@@ -38,9 +38,9 @@ function Footer({ todo, setTodo, data, setData }) {
   const compTodo = [...data]?.filter((item) => item.completed_at);
   const cleanTodoApi = async () => {
     await fetch(`${url}/todos/${compTodo[0].id}`, {
-      method: "DELETE",
+      method: 'DELETE',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         authorization: token,
       },
     })
@@ -48,38 +48,31 @@ function Footer({ todo, setTodo, data, setData }) {
         if (!res.ok) {
           throw new Error(res.statusText);
         }
-        console.log(res);
         return res.json();
       })
-      .then((res) => {
-        console.log(res);
-        console.log(todo);
+      .then(() => {
         setTodo(compTodo);
         setData(compTodo);
         getApi();
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
 
   return (
-    <>
-      <div className="flex items-center justify-between px-8 py-4">
-        <span>
-          {todo?.filter((item) => !item.completed_at).length} 個待完成項目
-        </span>
-        <a
-          className="block hover:text-primary cursor-pointer"
-          onClick={(e) => {
-            console.log(compTodo);
-            cleanTodoApi();
-          }}
-        >
-          清除已完成項目
-        </a>
-      </div>
-    </>
+    <div className="flex items-center justify-between px-8 py-4">
+      <span>
+        {todo?.filter((item) => !item.completed_at).length}
+        {' '}
+        個待完成項目
+      </span>
+      <a
+        className="block hover:text-primary cursor-pointer"
+        onClick={() => {
+          cleanTodoApi();
+        }}
+      >
+        清除已完成項目
+      </a>
+    </div>
   );
 }
 
