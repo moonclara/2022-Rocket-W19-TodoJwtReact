@@ -1,14 +1,14 @@
 import { useNavigate, NavLink } from "react-router-dom";
-import { set, useForm } from "react-hook-form";
+import {  useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import { useAuth } from "../components/Context";
 import title from "../images/title.png";
 import login from "../images/login.svg";
 import "../App.css";
-const url = "https://todoo.5xcamp.us";
 
+const url = "https://todoo.5xcamp.us";
 const LoginPage = () => {
-  const { token, setToken } = useAuth();
+  const { setToken } = useAuth();
   const navigate = useNavigate();
   const {
     register,

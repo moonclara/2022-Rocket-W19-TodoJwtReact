@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
-import Swal from "sweetalert2";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/Context";
 import Header from "../components/Header";
 import Content from "../containers/Content";

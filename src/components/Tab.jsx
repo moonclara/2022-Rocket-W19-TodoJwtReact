@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function Tab({ todo, setTodo, data, setData }) {
+function Tab({ setTodo, data }) {
   // TODO : Tab CSS 狀態切換
   const [tab, setTab] = useState([
     {

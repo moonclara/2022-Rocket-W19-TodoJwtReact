@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { useAuth } from "./Context";
+
 const url = "https://todoo.5xcamp.us";
 
 
@@ -14,13 +16,10 @@ function List({ todo, setTodo, data, setData }) {
       },
     })
       .then((res) => {
-        // 使用 fetch ，若伺服器有正確回應，不管甚麼狀態碼，res 都會進入 then
-        // 因此透過 res 中的 ok 來判斷狀態碼是否正確，如果是 true，狀態碼會在 200-209之間
         if (!res.ok) {
           throw new Error(res.statusText);
         }
         console.log(res);
-        // 轉換成 JSON 再傳入下一個 then 中處理
         return res.json();
       })
       .then((res) => {

@@ -4,10 +4,10 @@ import { useAuth } from "../components/Context";
 import title from "../images/title.png";
 import login from "../images/login.svg";
 import "../App.css";
-const url = "https://todoo.5xcamp.us";
 
+const url = "https://todoo.5xcamp.us";
 const SignUpPage = () => {
-  const { token, setToken } = useAuth();
+  const {  setToken } = useAuth();
   const navigate = useNavigate();
   const {
     register,

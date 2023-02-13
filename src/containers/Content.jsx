@@ -4,8 +4,6 @@ import AddTodo from "../components/AddTodo";
 import TodoList from "./TodoList";
 
 const url = "https://todoo.5xcamp.us";
-
-
 function Content() {
   const [todo, setTodo] = useState([]); // !初始資料
   const [data, setData] = useState(todo); // !拿來渲染用

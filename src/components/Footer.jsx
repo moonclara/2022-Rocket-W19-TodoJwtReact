@@ -1,11 +1,41 @@
+import { useEffect, useState } from "react";
 import { useAuth } from "./Context";
+
 const url = "https://todoo.5xcamp.us";
 
 function Footer({ todo, setTodo, data, setData }) {
-  const { token, setToken } = useAuth();
+  const { token } = useAuth();
+
+
+
+  const getApi = async () => {
+    await fetch(`${url}/todos`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+        console.log(res);
+        return res.json();
+      })
+      .then((res) => {
+        console.log(res);
+        // TODO : 取得 todo 列表
+        setTodo(res.todos);
+        setData(res.todos);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   // TODO : 清除已完成項目
-  const compTodo = [...data]?.filter((item) => !item.completed_at);
+  const compTodo = [...data]?.filter((item) => item.completed_at);
   const cleanTodoApi = async () => {
     await fetch(`${url}/todos/${compTodo[0].id}`, {
       method: "DELETE",
@@ -26,6 +56,7 @@ function Footer({ todo, setTodo, data, setData }) {
         console.log(todo);
         setTodo(compTodo);
         setData(compTodo);
+        getApi();
       })
       .catch((err) => {
         console.log(err);
@@ -42,7 +73,6 @@ function Footer({ todo, setTodo, data, setData }) {
           className="block hover:text-primary cursor-pointer"
           onClick={(e) => {
             console.log(compTodo);
-
             cleanTodoApi();
           }}
         >
